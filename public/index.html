@@ -322,7 +322,7 @@ body.compacta .col-b,body.compacta .col-e,body.compacta .col-v,body.compacta .co
   <div class="avance"><span id="avanceBarra"></span><em class="avance-txt" id="avanceTxt"></em></div>
 </header>
 
-<div id="bannerSync" style="display:none;background:var(--tr);color:#fff;padding:11px 16px;margin:14px 0;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14.5px;letter-spacing:.03em;display:flex;align-items:center;gap:12px;box-shadow:0 8px 22px -12px rgba(242,101,34,.5)">
+<div id="bannerSync" style="background:var(--tr);color:#fff;padding:11px 16px;margin:14px 0;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14.5px;letter-spacing:.03em;align-items:center;gap:12px;box-shadow:0 8px 22px -12px rgba(242,101,34,.5);display:none">
   <span style="flex:1">Alguien más actualizó la matriz.</span>
   <button class="accion" style="background:#fff;color:var(--tr);border-color:#fff" id="btnActualizarAhora">Actualizar ahora</button>
 </div>
@@ -702,6 +702,9 @@ function iniciarSondeo(){
       ultimaFirma = firma(datos);
       render();
       actualizarBotonGuardar();
+      // ya absorbimos el cambio remoto: el aviso deja de tener sentido
+      hayCambiosRemotos = false;
+      document.getElementById("bannerSync").style.display = "none";
       marcar("Actualizado por el equipo · "+hora());
     }catch(e){}
   }, 12000);
