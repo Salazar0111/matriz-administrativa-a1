@@ -12,12 +12,21 @@ Este proyecto tiene tres piezas:
 2. La forma más simple: sube esta carpeta a un repositorio de GitHub (crea uno nuevo, arrastra estos archivos) y luego en Vercel eliges **"Add New Project"** → **"Import Git Repository"** → seleccionas ese repo.
    - Alternativa sin GitHub: instala la CLI de Vercel (`npm i -g vercel`), entra a esta carpeta en una terminal y ejecuta `vercel`. Te va a pedir iniciar sesión y algunas preguntas; acepta los valores por defecto.
 
-## Paso 2 — Crear la base de datos compartida (Vercel KV)
+## Paso 2 — Crear la base de datos compartida (Upstash Redis, vía Marketplace)
 
-1. Dentro del proyecto ya importado, ve a la pestaña **Storage**.
-2. Clic en **Create Database** → elige **KV**.
-3. Dale un nombre, por ejemplo `matriz-suplencias`.
-4. Cuando termine, Vercel te va a preguntar a qué proyecto conectarla — conéctala a este mismo proyecto. Esto agrega automáticamente las variables de entorno que la función `api/matriz.js` necesita (`KV_REST_API_URL`, `KV_REST_API_TOKEN`, etc.) — no tienes que copiarlas a mano.
+Vercel descontinuó "Vercel KV" como producto propio; el reemplazo actual es una integración de **Upstash Redis** desde su Marketplace. Se instala en un solo comando, parado en la carpeta del proyecto ya vinculada (`vercel link`):
+
+```bash
+vercel install upstash
+```
+
+Te va a preguntar qué producto de Upstash quieres — elige **Redis**. Sigue las preguntas (nombre de la base de datos, región, plan — el plan gratuito alcanza de sobra para esto). Al terminar, conecta automáticamente las credenciales a tu proyecto como variables de entorno — no tienes que copiarlas a mano.
+
+Si el comando `vercel install upstash` no te reconoce el producto directamente, usa la forma explícita:
+
+```bash
+vercel integration add upstash/upstash-redis
+```
 
 ## Paso 3 — (Opcional pero recomendado) Proteger el acceso con una clave
 

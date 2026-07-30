@@ -543,7 +543,15 @@ async function cargar(){
       marcar("Sincronizado "+hora());
       return;
     }
-  }catch(e){ marcar("Sin conexión con el servidor — revisa tu internet"); return; }
+  }catch(e){
+    // el servidor no respondió — mostramos el inventario base localmente para no dejar la
+    // pantalla vacía, pero SIN intentar guardarlo (evita perder lo que haya en el servidor real)
+    datos = INICIAL.map(x=>({...x}));
+    normalizar();
+    ultimaFirma = "";
+    marcar("Sin conexión con el servidor — los cambios no se están guardando");
+    return;
+  }
   // primera vez: nadie ha guardado nada compartido todavía — sembrar con el inventario base
   datos = INICIAL.map(x=>({...x}));
   normalizar();

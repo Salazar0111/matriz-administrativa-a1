@@ -16,6 +16,7 @@ const redis = url && token ? new Redis({ url, token }) : null;
 const CLAVE = 'matriz-suplencias-compartida-v1';
 
 export default async function handler(req, res) {
+  // Autorización simple por clave compartida (ver variable de entorno MATRIZ_CLAVE_ACCESO)
   const clave = req.headers['x-clave-acceso'] || '';
   if (process.env.MATRIZ_CLAVE_ACCESO && clave !== process.env.MATRIZ_CLAVE_ACCESO) {
     return res.status(401).json({ error: 'Clave de acceso incorrecta' });
