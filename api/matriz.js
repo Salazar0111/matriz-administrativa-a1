@@ -31,7 +31,12 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const value = await redis.get(CLAVE);
-      return res.status(200).json({ value: value || null });
+      // OJO: el cliente de Upstash deserializa el JSON por su cuenta, así que aquí `value`
+      // suele llegar ya como arreglo, no como texto. El navegador espera texto y le hace
+      // JSON.parse — si le mandamos el arreglo, revienta y la app cree que no hay servidor.
+      // Devolvemos siempre texto, venga como venga.
+      const texto = value == null ? null : (typeof value === 'string' ? value : JSON.stringify(value));
+      return res.status(200).json({ value: texto });
     } catch (e) {
       return res.status(500).json({ error: 'No se pudo leer la matriz' });
     }

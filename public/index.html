@@ -161,6 +161,8 @@ button.accion{
 button.accion:hover{background:var(--tinta);color:#fff;border-color:var(--tinta);transform:translateY(-1px)}
 button.accion.fuerte{background:var(--a1);border-color:var(--a1);color:#fff}
 button.accion.fuerte:hover{background:#1E2050;border-color:#1E2050}
+button.accion.peligro{background:#b00020;border-color:#b00020;color:#fff}
+button.accion.peligro:hover{background:#8c0019;border-color:#8c0019}
 .acciones{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:22px}
 
 /* ══════════ cifras ══════════ */
@@ -371,6 +373,7 @@ body.compacta .col-b,body.compacta .col-e,body.compacta .col-v,body.compacta .co
 </div>
 
 <div class="acciones">
+  <button class="accion fuerte" id="btnGuardarAhora">Guardar ahora</button>
   <button class="accion fuerte" id="btnAgregar">Agregar proceso</button>
   <button class="accion" id="btnCSV">Exportar CSV</button>
   <button class="accion" id="btnJSON">Guardar copia</button>
@@ -484,6 +487,9 @@ let guardando = null;
 let ultimaFirma = "";     // huella del último dato conocido, para detectar cambios remotos
 let hayCambiosRemotos = false;
 let sondeoActivo = null;
+/* SEGURO CONTRA BORRADO: mientras no hayamos leído bien el servidor, lo que se ve en
+   pantalla es el inventario base, NO los datos del equipo. Guardarlo los destruiría. */
+let modoSeguro = true;
 
 function firma(d){ return JSON.stringify(d); }
 function hayEdicionActiva(){
@@ -549,9 +555,11 @@ function guardarIdentidad(nombre){
 async function cargar(){
   try{
     const r = await apiLeer();
-    if(r && r.value){
-      datos = normalizar(JSON.parse(r.value));
+    const filas = r ? aFilas(r.value) : null;
+    if(filas){
+      datos = normalizar(filas);
       ultimaFirma = firma(datos);
+      modoSeguro = false;                 // leímos bien: a partir de aquí sí se puede guardar
       marcar("Sincronizado "+hora());
       // ¿quedó en este navegador trabajo que nunca llegó al servidor? no descartarlo en silencio
       const resp = leerRespaldoLocal();
@@ -566,21 +574,28 @@ async function cargar(){
       return;
     }
   }catch(e){
-    // el servidor no respondió — mostramos el inventario base localmente para no dejar la
-    // pantalla vacía, pero SIN intentar guardarlo (evita perder lo que haya en el servidor real)
-    datos = INICIAL.map(x=>({...x}));
-    normalizar();
+    // no se pudo leer. Mostramos el inventario base para no dejar la pantalla vacía, pero
+    // queda en MODO SEGURO: lo que se ve NO son los datos del equipo, así que no se guarda.
+    datos = normalizar(INICIAL.map(x=>({...x})));
     ultimaFirma = "";
-    marcar("Sin conexión con el servidor — los cambios no se están guardando");
+    modoSeguro = true;
+    avisoModoSeguro("No se pudo leer el servidor");
     return;
   }
   // el servidor respondió, pero vacío. NO sembramos automáticamente: si esto ocurre por un
   // fallo temporal (base recién creada, variables de entorno mal puestas), un guardado
   // automático aquí borraría el trabajo de todo el equipo. Lo mostramos y que decida una persona.
-  datos = INICIAL.map(x=>({...x}));
-  normalizar();
+  datos = normalizar(INICIAL.map(x=>({...x})));
   ultimaFirma = "";
-  marcar("El servidor está vacío — pulsa «Guardar ahora» solo si es la primera vez que se usa");
+  modoSeguro = true;
+  avisoModoSeguro("El servidor está vacío");
+}
+/* aviso grande e imposible de ignorar: lo de pantalla es el inventario base, no los datos reales */
+function avisoModoSeguro(motivo){
+  marcar("⚠ "+motivo+" — esto es el inventario base, NO los datos del equipo. Nada se está guardando.");
+  const e = document.getElementById("estado");
+  if(e) e.style.color = "#b00020";
+  actualizarBotonGuardar();
 }
 function normalizar(arr){
   (arr || datos).forEach(f=>{
@@ -591,13 +606,28 @@ function normalizar(arr){
   });
   return arr || datos;
 }
+/* El servidor puede devolver el valor como texto JSON o ya deserializado (el cliente de
+   Upstash lo parsea por su cuenta). Aceptamos ambas formas: si esto falla, la app cree que
+   no hay servidor, muestra el inventario base y acaba escribiéndolo encima de los datos. */
+function aFilas(valor){
+  if(valor == null) return null;
+  if(Array.isArray(valor)) return valor;
+  if(typeof valor === "string"){
+    try{ const x = JSON.parse(valor); return Array.isArray(x) ? x : null; }catch(e){ return null; }
+  }
+  return null;
+}
 /* huella de lo que venga del servidor, medida igual que la local (ya normalizada),
    para que comparar "servidor vs pantalla" no dé falsos positivos por campos añadidos */
 function firmaRemota(valor){
-  try{ return firma(normalizar(JSON.parse(valor))); }catch(e){ return null; }
+  const f = aFilas(valor);
+  return f ? firma(normalizar(f)) : null;
 }
 function guardar(){
   respaldarLocal();          // primero la copia local: si el servidor falla, el trabajo no se pierde
+  // en modo seguro lo de pantalla es el inventario base: guardarlo borraría los datos del equipo
+  if(modoSeguro){ actualizarBotonGuardar(); return; }
+  actualizarBotonGuardar();   // marca "pendiente" en cuanto hay un cambio, no solo al terminar
   clearTimeout(guardando);
   guardando = setTimeout(async ()=>{
     const j = JSON.stringify(datos);
@@ -606,6 +636,7 @@ function guardar(){
         await apiGuardar(j);
         ultimaFirma = j;
         marcar("Guardado "+hora()+(miNombre?" · "+miNombre:""));
+        actualizarBotonGuardar();
         guardando = null;
         return;
       }catch(e){
@@ -613,10 +644,39 @@ function guardar(){
         // se agotaron los reintentos: aviso visible y permanente, y la copia local ya está a salvo
         marcar("⚠ NO SE ESTÁ GUARDANDO — tus cambios solo están en este navegador. No cierres la página.");
         document.getElementById("estado").style.color = "#b00020";
+        actualizarBotonGuardar();
       }
     }
     guardando = null;
   },500);
+}
+/* ═══ guardado manual ═══ */
+async function guardarAhora(){
+  if(modoSeguro){
+    if(!confirm("⚠ ATENCIÓN\n\nNo se pudo leer el servidor, así que lo que ves en pantalla es el INVENTARIO BASE — no los datos del equipo.\n\nSi guardas ahora, reemplazas los datos del equipo por esto y se pierden.\n\nSolo continúa si es la primera vez que se usa la matriz, o si acabas de cargar una copia buena con «Cargar copia».\n\n¿Guardar de todos modos?")) return;
+    modoSeguro = false;
+  }
+  clearTimeout(guardando); guardando = null;
+  respaldarLocal();
+  const j = JSON.stringify(datos);
+  marcar("Guardando…");
+  try{
+    await apiGuardar(j);
+    ultimaFirma = j;
+    document.getElementById("estado").style.color = "";
+    marcar("Guardado "+hora()+(miNombre?" · "+miNombre:""));
+  }catch(e){
+    document.getElementById("estado").style.color = "#b00020";
+    marcar("⚠ NO SE PUDO GUARDAR ("+(e.message||"error")+") — tus cambios siguen en este navegador. No cierres la página.");
+  }
+  actualizarBotonGuardar();
+}
+function actualizarBotonGuardar(){
+  const b = document.getElementById("btnGuardarAhora");
+  if(!b) return;
+  if(modoSeguro){ b.textContent = "Forzar guardado"; b.classList.add("peligro"); return; }
+  b.classList.remove("peligro");
+  b.textContent = hayCambiosSinGuardar() ? "Guardar ahora ●" : "Guardar ahora";
 }
 function hora(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
 function fechaCorta(){const d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")}
@@ -638,9 +698,10 @@ function iniciarSondeo(){
         document.getElementById("bannerSync").style.display = "flex";
         return;
       }
-      datos = normalizar(JSON.parse(r.value));
+      datos = normalizar(aFilas(r.value));
       ultimaFirma = firma(datos);
       render();
+      actualizarBotonGuardar();
       marcar("Actualizado por el equipo · "+hora());
     }catch(e){}
   }, 12000);
@@ -649,7 +710,8 @@ document.getElementById("btnActualizarAhora").addEventListener("click", async ()
   if(hayCambiosSinGuardar() && !confirm("Tienes cambios que el servidor todavía no confirmó. Si traes la versión del equipo ahora, esos cambios se pierden.\n\n¿Traer la versión del equipo de todos modos?")) return;
   try{
     const r = await apiLeer();
-    if(r && r.value){ datos = normalizar(JSON.parse(r.value)); ultimaFirma = firma(datos); render(); }
+    const f = r ? aFilas(r.value) : null;
+    if(f){ datos = normalizar(f); ultimaFirma = firma(datos); modoSeguro = false; render(); actualizarBotonGuardar(); }
   }catch(e){}
   hayCambiosRemotos = false;
   document.getElementById("bannerSync").style.display = "none";
@@ -956,6 +1018,7 @@ document.getElementById("btnDash").addEventListener("click",e=>{
   const d = document.getElementById("dash"); d.classList.toggle("oculto");
   e.target.textContent = d.classList.contains("oculto")?"Mostrar gráficas":"Ocultar gráficas";
 });
+document.getElementById("btnGuardarAhora").addEventListener("click",()=>guardarAhora());
 document.getElementById("btnAgregar").addEventListener("click",()=>agregarProceso());
 
 /* ═══ exportar ═══ */
@@ -996,7 +1059,7 @@ window.addEventListener("scroll",()=>{
 
 /* ═══ arranque ═══ */
 fichasPersonas();
-cargarIdentidad().then(()=>cargar()).then(()=>{ render(); iniciarSondeo(); });
+cargarIdentidad().then(()=>cargar()).then(()=>{ render(); actualizarBotonGuardar(); iniciarSondeo(); });
 </script>
 </body>
 </html>
