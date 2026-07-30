@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matriz de funciones y suplencias — A1 · Traduciendo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* --- marca A1 --- */
+  --a1:#2B2D6E;          /* azul marino A1 */
+  --a1-medio:#5457A3;
+  --a1-claro:#C9CADF;
+  --rojo:#C41230;        /* rojo carmín A1 — reservado para riesgo */
+  --rojo-suave:#FBE7E9;
+  /* --- marca Traduciendo --- */
+  --tr:#F26522;          /* naranja Traduciendo */
+  --tr-medio:#F79A63;
+  --tr-claro:#FCDFCE;
+  --negro:#141416;       /* negro Traduciendo */
+  /* --- neutros --- */
+  --tinta:#101118;
+  --tinta-2:#33353F;
+  --folio:#5B5F6B;
+  --papel:#F1F2F4;
+  --alto:#FFFFFF;
+  --linea:#DFE1E6;
+  --linea-2:#C4C7CF;
+  --ok:#166B41;
+  --ok-suave:#E4F2EA;
+  --ambar:#8A6011;
+  /* --- cristal --- */
+  --vidrio: rgba(255,255,255,.62);
+  --vidrio-fuerte: rgba(255,255,255,.78);
+  --vidrio-borde: rgba(255,255,255,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;color:var(--tinta);
+  font-family:"Barlow",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;font-weight:400;line-height:1.55;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(48vw 42vw at 8% -6%, rgba(43,45,110,.22), transparent 62%),
+    radial-gradient(50vw 44vw at 96% 14%, rgba(242,101,34,.20), transparent 60%),
+    radial-gradient(40vw 40vw at 30% 96%, rgba(43,45,110,.14), transparent 65%),
+    var(--papel);
+  background-attachment:fixed;
+}
+h1,h2,h3{font-family:"Barlow Condensed","Barlow",sans-serif;margin:0}
+.mono{font-family:"IBM Plex Mono",monospace}
+.wrap{max-width:1560px;margin:0 auto;padding:0 20px 80px}
+
+/* ══════════ cabecera de marca ══════════ */
+.marca{
+  background:linear-gradient(100deg,var(--a1) 0%,#232449 52%,var(--negro) 100%);
+  color:#fff;margin:0 -20px 0;padding:26px 20px 0;position:relative;overflow:hidden;
+}
+.marca::after{
+  content:"";position:absolute;right:-60px;top:-40px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(242,101,34,.28),transparent 68%);pointer-events:none;
+}
+.marca-int{max-width:1520px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:rgba(255,255,255,.68);margin-bottom:9px;font-weight:500;
+}
+.marca h1{
+  font-weight:700;font-size:clamp(27px,4.4vw,44px);line-height:.94;letter-spacing:.005em;
+  text-transform:uppercase;
+}
+.marca h1 em{font-style:normal;color:var(--tr)}
+.marca-fila{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sellos{display:flex;gap:8px;padding-bottom:4px}
+.sello-m{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:11.5px;
+  letter-spacing:.16em;text-transform:uppercase;padding:5px 11px;
+  border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.9);
+}
+.sello-m i{display:inline-block;width:8px;height:8px;margin-right:7px;vertical-align:-1px}
+/* barra de avance en el borde inferior de la cabecera */
+.avance{height:5px;background:rgba(255,255,255,.14);margin:22px -20px 0;position:relative}
+.avance span{display:block;height:100%;background:var(--tr);width:0;transition:width .5s cubic-bezier(.2,.7,.3,1)}
+.avance-txt{
+  position:absolute;right:20px;bottom:9px;font-family:"IBM Plex Mono",monospace;
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6);
+}
+
+/* ══════════ guía ══════════ */
+.guia{
+  background:var(--vidrio);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  border:1px solid var(--vidrio-borde);border-radius:16px;margin:18px 0;overflow:hidden;
+  box-shadow:0 8px 28px -16px rgba(16,17,24,.2);
+}
+.guia summary{
+  cursor:pointer;padding:13px 18px;font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:15px;letter-spacing:.11em;text-transform:uppercase;color:var(--a1);list-style:none;
+  display:flex;align-items:center;gap:9px;
+}
+.guia summary::-webkit-details-marker{display:none}
+.guia summary::before{content:"›";font-size:20px;line-height:0;transition:transform .2s}
+.guia[open] summary::before{transform:rotate(90deg)}
+.guia-cuerpo{padding:2px 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.paso{border-top:3px solid var(--a1);padding-top:11px}
+.paso b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:16px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;color:var(--tinta)}
+.paso p{margin:0;font-size:14.5px;color:var(--tinta-2);line-height:1.5}
+.paso:nth-child(2){border-color:var(--tr)}
+.paso:nth-child(3){border-color:var(--rojo)}
+
+/* ══════════ barra de control ══════════ */
+.control{
+  position:sticky;top:14px;z-index:40;
+  background:var(--vidrio);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+  border:1px solid var(--vidrio-borde);border-radius:16px;
+  padding:14px 16px;margin:18px 0;
+  display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;
+  box-shadow:0 8px 32px -14px rgba(16,17,24,.18);
+}
+.control.pegada{box-shadow:0 14px 38px -14px rgba(16,17,24,.32)}
+.grupo{display:flex;flex-direction:column;gap:7px}
+.grupo>label,.rot{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tinta-2);font-weight:500;
+}
+.segmento{display:flex;border:1px solid var(--linea-2);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.5)}
+.segmento button{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.08em;
+  text-transform:uppercase;padding:8px 15px;background:transparent;color:var(--tinta-2);
+  border:none;border-right:1px solid var(--linea);cursor:pointer;transition:all .16s;
+}
+.segmento button:last-child{border-right:none}
+.segmento button:hover{background:rgba(255,255,255,.7)}
+.segmento button.on{background:var(--tinta);color:#fff}
+.segmento button.on[data-emp="A1"]{background:var(--a1)}
+.segmento button.on[data-emp="TRAD"]{background:var(--tr);color:#fff}
+select,input[type=search]{
+  font-family:inherit;font-size:15px;color:var(--tinta);background:rgba(255,255,255,.7);
+  border:1px solid var(--linea-2);padding:7px 9px;border-radius:8px;min-height:36px;
+}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--a1);outline-offset:1px}
+.crece{flex:1;min-width:170px}.crece input{width:100%}
+
+/* fichas de ausencia */
+.fichas{display:flex;gap:7px;flex-wrap:wrap}
+.ficha{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.05em;
+  padding:7px 13px;background:rgba(255,255,255,.55);border:1px solid var(--linea-2);border-radius:9px;color:var(--tinta);
+  cursor:pointer;transition:all .16s;
+}
+.ficha:hover{border-color:var(--rojo);color:var(--rojo);background:rgba(255,255,255,.8)}
+.ficha.on{background:var(--rojo);border-color:var(--rojo);color:#fff}
+
+button.accion{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.07em;
+  text-transform:uppercase;background:rgba(255,255,255,.6);color:var(--tinta);border:1px solid var(--linea-2);
+  border-radius:9px;padding:9px 15px;cursor:pointer;transition:all .16s;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+button.accion:hover{background:var(--tinta);color:#fff;border-color:var(--tinta);transform:translateY(-1px)}
+button.accion.fuerte{background:var(--a1);border-color:var(--a1);color:#fff}
+button.accion.fuerte:hover{background:#1E2050;border-color:#1E2050}
+.acciones{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:22px}
+
+/* ══════════ cifras ══════════ */
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:22px}
+.cifra{
+  background:var(--vidrio);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  border:1px solid var(--vidrio-borde);border-radius:14px;
+  padding:15px 17px;position:relative;overflow:hidden;box-shadow:0 6px 22px -14px rgba(16,17,24,.2);
+}
+.cifra::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--linea-2)}
+.cifra .n{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:700;line-height:.92;display:block;color:var(--tinta)}
+.cifra .t{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-2);margin-top:8px;display:block;line-height:1.4;font-weight:500}
+.cifra.alerta::after{background:var(--rojo)} .cifra.alerta .n{color:var(--rojo)}
+.cifra.pend::after{background:var(--tr)} .cifra.pend .n{color:var(--tr)}
+.cifra.bien::after{background:var(--ok)} .cifra.bien .n{color:var(--ok)}
+
+/* ══════════ tablero ══════════ */
+.dash{border-radius:18px;overflow:hidden;margin-bottom:22px;
+  background:var(--vidrio);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid var(--vidrio-borde);box-shadow:0 10px 34px -16px rgba(16,17,24,.22);
+}
+.dash-cab{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:rgba(255,255,255,.35);
+  padding:14px 18px;border-bottom:1px solid var(--vidrio-borde);
+}
+.dash-cab h2{font-size:22px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.dash-cab .alcance{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2);font-weight:500}
+.dash-cab button{margin-left:auto}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.dash.oculto .dash-grid{display:none}
+.panel{background:rgba(255,255,255,.32);padding:19px 21px 21px;position:relative;border-top:1px solid rgba(255,255,255,.5);border-left:1px solid rgba(255,255,255,.5)}
+.panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--a1);transform:scaleX(0);transform-origin:left;transition:transform .35s}
+.panel:hover::before{transform:scaleX(1)}
+.panel h3{font-size:14.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:4px}
+.panel .pista{font-size:13.5px;color:var(--tinta-2);margin:0 0 14px;line-height:1.45;font-weight:400}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);font-weight:500}
+.leyenda i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+.fila-barra{display:flex;align-items:center;gap:11px;margin-bottom:7px;cursor:pointer;padding:3px 4px;border-radius:6px;transition:background .15s}
+.fila-barra:hover{background:rgba(255,255,255,.55)}
+.fila-barra .etq{width:100px;flex:none;font-size:14.5px;font-weight:500;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tinta)}
+.fila-barra .pista-barra{flex:1;height:22px;background:rgba(255,255,255,.55);border-radius:5px;display:flex;min-width:0;overflow:hidden}
+.fila-barra .num{width:62px;flex:none;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--tinta-2);text-align:right;font-weight:500}
+.seg{height:100%;transition:width .4s cubic-bezier(.2,.7,.3,1)}
+.seg.a1{background:var(--a1)} .seg.a1b{background:var(--a1-medio)} .seg.a1c{background:var(--a1-claro)}
+.seg.tr{background:var(--tr)} .seg.trb{background:var(--tr-medio)} .seg.trc{background:var(--tr-claro)}
+.seg.amb{background:#8B8F99}
+.seg.riesgo{background:var(--rojo)}
+.seg.solido{background:var(--a1)}
+.seg.ok{background:var(--ok)}
+.seg.oscuro{background:var(--negro)}
+.seg.tenue{background:#B9BDC6}
+.aviso{margin-top:14px;padding:11px 13px;background:rgba(196,18,48,.14);border-left:3px solid var(--rojo);border-radius:8px;font-size:13.5px;font-weight:500;line-height:1.45;color:#7A0F20}
+.aviso.ok{background:rgba(30,122,76,.14);border-left-color:var(--ok);color:#0F4D2E}
+
+/* ══════════ contingencia ══════════ */
+.contingencia{display:none;background:var(--negro);color:#fff;padding:19px 21px;margin-bottom:22px;border-left:5px solid var(--rojo);border-radius:14px}
+.contingencia.activo{display:block}
+.contingencia h2{font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px}
+.contingencia h2 em{font-style:normal;color:var(--tr)}
+.contingencia p{margin:0;color:rgba(255,255,255,.78);font-size:14.5px;font-weight:400}
+.res-cont{display:flex;gap:30px;flex-wrap:wrap;margin-top:14px}
+.res-cont div{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.68);font-weight:500}
+.res-cont b{font-family:"Barlow Condensed",sans-serif;font-size:29px;font-weight:700;display:block;letter-spacing:0;color:#fff}
+.res-cont b.det{color:var(--rojo)} .res-cont b.cub{color:var(--tr)}
+
+/* ══════════ tabla ══════════ */
+.bloque{margin-bottom:24px;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px -16px rgba(16,17,24,.22)}
+.bloque-tit{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.13em;
+  text-transform:uppercase;padding:11px 14px;background:var(--tinta);color:#fff;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.bloque-tit .cnt{display:flex;align-items:center;gap:12px;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.68)}
+.add-bloque{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.07em;background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.32);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .16s}
+.add-bloque:hover{background:var(--tr);border-color:var(--tr);color:#fff}
+table{width:100%;border-collapse:collapse;background:var(--vidrio-fuerte);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--tinta-2);text-align:left;font-weight:600;padding:10px 8px;
+  border-bottom:1px solid var(--linea-2);white-space:nowrap;background:rgba(255,255,255,.4);
+}
+td{border-bottom:1px solid rgba(196,199,207,.55);padding:5px 6px;vertical-align:top}
+tr.fila{border-left:5px solid transparent}
+tr.fila.e-A1{border-left-color:var(--a1)}
+tr.fila.e-TRAD{border-left-color:var(--tr)}
+tr.fila.e-AMBAS{border-left-color:#8B8F99}
+tr.fila:hover>td{background:rgba(255,255,255,.55)}
+td.proc{min-width:230px}
+td input,td select,td textarea{
+  width:100%;border:1px solid transparent;background:transparent;font-family:inherit;
+  font-size:15px;color:var(--tinta);padding:6px 7px;border-radius:6px;font-weight:400;
+}
+td textarea{resize:vertical;min-height:36px;line-height:1.4;font-weight:400}
+td input:hover,td select:hover,td textarea:hover{border-color:var(--linea-2);background:rgba(255,255,255,.5)}
+td input:focus,td select:focus,td textarea:focus{border-color:var(--a1);background:var(--alto)}
+td.mono input{font-family:"IBM Plex Mono",monospace;font-size:13.5px}
+td.crit-Alta select{font-weight:700;color:var(--rojo)}
+td.crit-Media select{font-weight:600;color:var(--tinta)}
+td.crit-Baja select{color:var(--tinta-2)}
+.borrar{background:none;border:none;color:var(--tinta-2);font-size:19px;line-height:1;cursor:pointer;padding:5px 7px;font-family:inherit;border-radius:6px}
+.borrar:hover{color:#fff;background:var(--rojo)}
+tr.sin-suplente td.suplente{background:rgba(196,18,48,.13)}
+tr.por-definir td.titular{background:rgba(242,101,34,.16)}
+tr.oculto,tr.apagado{opacity:.3}
+tr.detenido>td{background:rgba(196,18,48,.14)}
+tr.cubierto>td{background:rgba(30,122,76,.14)}
+.marca-est{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:700;
+  letter-spacing:.11em;text-transform:uppercase;border:1.5px solid var(--rojo);color:var(--rojo);
+  background:rgba(255,255,255,.7);border-radius:5px;
+  padding:3px 7px;transform:rotate(-2deg);white-space:nowrap;
+}
+.marca-est.ok{border-color:var(--ok);color:var(--ok);transform:rotate(1.2deg)}
+.celda-marca{width:1%;white-space:nowrap;padding-top:9px}
+/* vista compacta */
+body.compacta .col-b,body.compacta .col-e,body.compacta .col-v,body.compacta .col-d,body.compacta .col-n{display:none}
+
+.pie{margin-top:30px;padding-top:15px;border-top:1px solid var(--linea-2);color:var(--tinta-2);font-size:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-weight:400}
+#estado{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.nota-vacia{padding:28px;text-align:center;color:var(--tinta-2);font-size:15px;background:var(--vidrio);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px dashed var(--linea-2);border-radius:14px}
+
+@media (max-width:880px){
+  .wrap{padding:0 12px 60px}
+  .marca{margin:0 -12px 0;padding:20px 12px 0}
+  .avance{margin:18px -12px 0}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  .control{position:static}
+  .fila-barra .etq{width:76px;font-size:12px}
+  .fila-barra .num{width:50px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="marca">
+  <div class="marca-int">
+    <div class="eyebrow">Control administrativo · Continuidad operativa</div>
+    <div class="marca-fila">
+      <h1>Matriz de funciones<br>y <em>suplencias</em></h1>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <div class="sellos">
+          <span class="sello-m"><i style="background:#2B2D6E;box-shadow:0 0 0 1px rgba(255,255,255,.35)"></i>A1 Traducciones</span>
+          <span class="sello-m"><i style="background:#F26522"></i>Traduciendo</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="rot" style="color:rgba(255,255,255,.62)">Tú eres</span>
+          <select id="miNombre" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;border-radius:8px">
+            <option value="">— elegir —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="avance"><span id="avanceBarra"></span><em class="avance-txt" id="avanceTxt"></em></div>
+</header>
+
+<div id="bannerSync" style="display:none;background:var(--tr);color:#fff;padding:11px 16px;margin:14px 0;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14.5px;letter-spacing:.03em;display:flex;align-items:center;gap:12px;box-shadow:0 8px 22px -12px rgba(242,101,34,.5)">
+  <span style="flex:1">Alguien más actualizó la matriz.</span>
+  <button class="accion" style="background:#fff;color:var(--tr);border-color:#fff" id="btnActualizarAhora">Actualizar ahora</button>
+</div>
+
+<details class="guia">
+  <summary>Cómo se usa</summary>
+  <div class="guia-cuerpo">
+    <div class="paso"><b>1 · Definir titular</b><p>Un solo dueño por proceso. Las filas con fondo naranja todavía están compartidas y necesitan decisión.</p></div>
+    <div class="paso"><b>2 · Asignar suplente</b><p>Quien entra sin pedir autorización cuando el titular no está. Las celdas rojas no tienen a nadie.</p></div>
+    <div class="paso"><b>3 · Probar la ausencia</b><p>Marca una persona en «Si hoy falta». Si queda algo crítico en rojo, la reunión no terminó.</p></div>
+    <div class="paso"><b>¿Qué es «Documentado»?</b><p>Si existe un instructivo escrito de ese proceso —pasos, dónde están los archivos, credenciales— que le permita a un suplente hacerlo sin preguntar. «No» no es un error: es la lista de instructivos que faltan por escribir.</p></div>
+  </div>
+</details>
+
+<div class="control" id="control">
+  <div class="grupo">
+    <span class="rot">Empresa</span>
+    <div class="segmento" id="segEmpresa">
+      <button data-emp="" class="on">Todas</button>
+      <button data-emp="A1">A1</button>
+      <button data-emp="TRAD">Traduciendo</button>
+      <button data-emp="AMBAS">Ambas</button>
+    </div>
+  </div>
+  <div class="grupo">
+    <span class="rot">Si hoy falta</span>
+    <div class="fichas" id="fichas"></div>
+  </div>
+  <div class="grupo">
+    <label for="fPersona">Persona</label>
+    <select id="fPersona"><option value="">Todas</option></select>
+  </div>
+  <div class="grupo">
+    <label for="fCrit">Criticidad</label>
+    <select id="fCrit"><option value="">Todas</option><option>Alta</option><option>Media</option><option>Baja</option></select>
+  </div>
+  <div class="grupo">
+    <span class="rot">Vista</span>
+    <div class="segmento" id="segVista">
+      <button data-vista="completa" class="on">Completa</button>
+      <button data-vista="compacta">Compacta</button>
+    </div>
+  </div>
+  <div class="grupo crece">
+    <label for="fBuscar">Buscar</label>
+    <input type="search" id="fBuscar" placeholder="facturación, nómina, claves…">
+  </div>
+</div>
+
+<div class="acciones">
+  <button class="accion fuerte" id="btnAgregar">Agregar proceso</button>
+  <button class="accion" id="btnCSV">Exportar CSV</button>
+  <button class="accion" id="btnJSON">Guardar copia</button>
+  <button class="accion" id="btnImportar">Cargar copia</button>
+  <button class="accion" id="btnReiniciar">Reiniciar</button>
+  <input type="file" id="archivo" accept="application/json" hidden>
+</div>
+
+<div class="cifras" id="cifras"></div>
+
+<section class="dash" id="dash">
+  <div class="dash-cab">
+    <h2>Carga y cobertura</h2>
+    <span class="alcance" id="dashAlcance"></span>
+    <button class="accion" id="btnDash">Ocultar gráficas</button>
+  </div>
+  <div class="dash-grid" id="dashGrid"></div>
+</section>
+
+<div class="contingencia" id="contingencia">
+  <h2 id="contTitulo"></h2>
+  <p id="contTexto"></p>
+  <div class="res-cont">
+    <div><b class="det" id="contDetenidos">0</b>Se detienen</div>
+    <div><b class="cub" id="contCubiertos">0</b>Cubiertos</div>
+    <div><b id="contCriticos">0</b>Críticos detenidos</div>
+  </div>
+</div>
+
+<div id="tablero"></div>
+
+<div class="pie">
+  <span>Titular = quien lo hace normalmente. Suplente = quien entra sin pedir autorización cuando el titular no está.</span>
+  <span id="estado"></span>
+</div>
+
+</div>
+
+<script>
+const PERSONAS = ["Brayan","Ana María","Catalina","Sandra","Carlos Carrero","Por definir",""];
+const EMPRESAS = {A1:"A1 Traducciones", TRAD:"Traduciendo", AMBAS:"Ambas"};
+const BLOQUES_BASE = ["Cotización","Facturación","Cargas y registro contable","Tesorería","Nómina y seguridad social","Impuestos","Cartera","Proveedores y plataformas de clientes","Archivo y documentación","Representación y trámites externos","Reportes y apoyo"];
+const NUEVO_BLOQUE = "+ Nuevo bloque…";
+const CLAVE = "matriz-suplencias-compartida-v1";       // compartida entre todos (vive en Vercel KV)
+let CONTADOR_ID = 41;
+
+const INICIAL = [
+ // Cotización
+ {id:"p001",e:"A1",b:"Cotización",p:"Cotización de personas naturales y agencias",t:"Brayan",s1:"Ana María",s2:"",c:"Media",v:"1 día",d:"No",n:""},
+ {id:"p002",e:"A1",b:"Cotización",p:"Cotización de empresas",t:"Ana María",s1:"Brayan",s2:"",c:"Media",v:"1 día",d:"No",n:"Definir qué empresas cotiza cada uno"},
+ {id:"p003",e:"A1",b:"Cotización",p:"Cotización de eventos de interpretación",t:"Brayan",s1:"",s2:"",c:"Alta",v:"Horas",d:"No",n:"Suele ser urgente"},
+ {id:"p004",e:"A1",b:"Cotización",p:"Cotización internacional (LLC)",t:"Brayan",s1:"",s2:"",c:"Media",v:"2 días",d:"No",n:""},
+ // Facturación
+ {id:"p005",e:"A1",b:"Facturación",p:"Facturación A1",t:"Por definir",s1:"",s2:"",c:"Alta",v:"2 días",d:"No",n:"Hoy compartida Brayan / Ana María — definir dueño único"},
+ {id:"p006",e:"A1",b:"Facturación",p:"Facturación Carlos Carrero",t:"Por definir",s1:"",s2:"",c:"Alta",v:"2 días",d:"No",n:"Hoy compartida Brayan / Ana María"},
+ {id:"p007",e:"A1",b:"Facturación",p:"Elaboración y envío de prefacturas Brigard",t:"Ana María",s1:"Brayan",s2:"",c:"Alta",v:"Fecha de corte",d:"No",n:"Sin prefactura no hay OC y sin OC no hay factura"},
+ {id:"p008",e:"A1",b:"Facturación",p:"Solicitud de órdenes de compra GPA",t:"Por definir",s1:"",s2:"",c:"Alta",v:"Fecha de corte",d:"No",n:"Hoy compartida — definir dueño único"},
+ {id:"p009",e:"A1",b:"Facturación",p:"Facturación y cotización internacional LLC",t:"Brayan",s1:"",s2:"",c:"Media",v:"3 días",d:"No",n:""},
+ {id:"p010",e:"TRAD",b:"Facturación",p:"Facturación electrónica: emisión, envío, radicación, aceptación y recaudo",t:"Sandra",s1:"",s2:"",c:"Alta",v:"2 días",d:"No",n:"Volumen ~80% menor que A1"},
+ // Cargas
+ {id:"p011",e:"A1",b:"Cargas y registro contable",p:"Carga de facturas de gastos (notariales, envíos, cancillería, papelería, cafetería, Prebel)",t:"Catalina",s1:"",s2:"",c:"Baja",v:"1 semana",d:"No",n:""},
+ {id:"p012",e:"A1",b:"Cargas y registro contable",p:"Carga de extractos de tarjeta de crédito",t:"Catalina",s1:"",s2:"",c:"Baja",v:"1 semana",d:"No",n:""},
+ {id:"p013",e:"A1",b:"Cargas y registro contable",p:"Carga de facturas y cuentas de cobro de intérpretes y equipos",t:"Brayan",s1:"Catalina",s2:"",c:"Media",v:"3 días",d:"No",n:"Candidata natural para Catalina: es la misma tarea que ya hace"},
+ {id:"p014",e:"A1",b:"Cargas y registro contable",p:"Ingreso de pagos al sistema contable",t:"Brayan",s1:"Catalina",s2:"",c:"Media",v:"3 días",d:"No",n:""},
+ {id:"p015",e:"TRAD",b:"Cargas y registro contable",p:"Relación de gastos mensual y envío de soportes a contabilidad",t:"Sandra",s1:"",s2:"",c:"Media",v:"Fecha mensual",d:"No",n:""},
+ // Tesorería
+ {id:"p016",e:"A1",b:"Tesorería",p:"Pagos",t:"Brayan",s1:"",s2:"",c:"Alta",v:"Horas",d:"No",n:"Requiere acceso bancario y firma autorizada"},
+ {id:"p017",e:"A1",b:"Tesorería",p:"Caja menor A1",t:"Brayan",s1:"Catalina",s2:"",c:"Media",v:"2 días",d:"No",n:""},
+ {id:"p018",e:"TRAD",b:"Tesorería",p:"Caja menor Traduciendo (con soporte de cada movimiento)",t:"Sandra",s1:"",s2:"",c:"Media",v:"2 días",d:"No",n:""},
+ {id:"p019",e:"A1",b:"Tesorería",p:"Conciliación bancaria cuenta de ahorros (incluye retenciones)",t:"Brayan",s1:"",s2:"",c:"Media",v:"Fecha mensual",d:"No",n:""},
+ {id:"p020",e:"A1",b:"Tesorería",p:"Conciliación de pagos de clientes de Carlos Carrero",t:"Brayan",s1:"",s2:"",c:"Media",v:"Fecha mensual",d:"No",n:""},
+ {id:"p021",e:"TRAD",b:"Tesorería",p:"Administración de plataformas bancarias autorizadas",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Horas",d:"No",n:"Riesgo de acceso, no solo de conocimiento"},
+ // Nómina
+ {id:"p022",e:"A1",b:"Nómina y seguridad social",p:"Nómina A1",t:"Brayan",s1:"",s2:"",c:"Alta",v:"Fecha fija",d:"No",n:""},
+ {id:"p023",e:"TRAD",b:"Nómina y seguridad social",p:"Nómina Traduciendo",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Fecha fija",d:"No",n:"La hace únicamente ella"},
+ {id:"p024",e:"TRAD",b:"Nómina y seguridad social",p:"Preparación de la información para elaborar la nómina",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Fecha fija",d:"No",n:""},
+ {id:"p025",e:"A1",b:"Nómina y seguridad social",p:"Seguridad social y parafiscales A1",t:"Brayan",s1:"",s2:"",c:"Alta",v:"Fecha por NIT",d:"No",n:"Vencimiento legal, no se puede correr"},
+ {id:"p026",e:"TRAD",b:"Nómina y seguridad social",p:"Liquidación de aportes a seguridad social y parafiscales",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Fecha por NIT",d:"No",n:""},
+ // Impuestos
+ {id:"p027",e:"A1",b:"Impuestos",p:"Carga de impuestos",t:"Brayan",s1:"",s2:"",c:"Alta",v:"Calendario DIAN",d:"No",n:"Vencimiento legal con sanción"},
+ // Cartera
+ {id:"p028",e:"A1",b:"Cartera",p:"Cobranza",t:"Brayan",s1:"Ana María",s2:"",c:"Media",v:"1 semana",d:"No",n:""},
+ {id:"p029",e:"TRAD",b:"Cartera",p:"Seguimiento a cuentas de cobro de traductores y proveedores hasta su pago",t:"Sandra",s1:"",s2:"",c:"Media",v:"1 semana",d:"No",n:""},
+ // Proveedores y plataformas
+ {id:"p030",e:"A1",b:"Proveedores y plataformas de clientes",p:"Actualización e inscripción de formatos de proveedor",t:"Catalina",s1:"",s2:"",c:"Media",v:"Según cliente",d:"No",n:""},
+ {id:"p031",e:"TRAD",b:"Proveedores y plataformas de clientes",p:"Registro, actualización y renovación como proveedor ante clientes",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Fecha de vencimiento",d:"No",n:"Si se vence, se pierde la habilitación como proveedor"},
+ {id:"p032",e:"TRAD",b:"Proveedores y plataformas de clientes",p:"Documentación en plataformas de clientes y seguimiento a vencimientos",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Fecha de vencimiento",d:"No",n:"Necesita calendario visible, no memoria de una persona"},
+ {id:"p033",e:"AMBAS",b:"Proveedores y plataformas de clientes",p:"Usuarios y claves de plataformas de clientes y entidades",t:"Sandra",s1:"",s2:"",c:"Alta",v:"Horas",d:"No",n:"Sin acceso, se detiene incluso lo que otros sí saben hacer"},
+ // Archivo
+ {id:"p034",e:"TRAD",b:"Archivo y documentación",p:"Archivos físicos y digitales de la empresa",t:"Sandra",s1:"",s2:"",c:"Media",v:"1 semana",d:"No",n:""},
+ {id:"p035",e:"A1",b:"Archivo y documentación",p:"Registro documental de servicios prestados A1",t:"Por definir",s1:"",s2:"",c:"Media",v:"3 días",d:"No",n:"Hoy lo llevan Brayan y Ana María"},
+ {id:"p036",e:"TRAD",b:"Archivo y documentación",p:"Registro electrónico y documental de servicios prestados",t:"Sandra",s1:"",s2:"",c:"Media",v:"3 días",d:"No",n:""},
+ {id:"p037",e:"TRAD",b:"Archivo y documentación",p:"Custodia de la documentación generada en las actividades",t:"Sandra",s1:"",s2:"",c:"Media",v:"1 semana",d:"No",n:""},
+ // Representación
+ {id:"p038",e:"A1",b:"Representación y trámites externos",p:"Trámites presenciales ante Secretaría de Hacienda, DIAN, bancos y notarías",t:"Brayan",s1:"Carlos Carrero",s2:"",c:"Alta",v:"Según requerimiento",d:"No",n:"Solo puede hacerlo un representante legal inscrito. No es delegable por decisión interna: si ninguno está, se requiere poder especial otorgado con anticipación"},
+ // Reportes
+ {id:"p039",e:"A1",b:"Reportes y apoyo",p:"Informes bajo requerimiento de clientes o proyectos",t:"Brayan",s1:"Ana María",s2:"",c:"Media",v:"Según plazo",d:"No",n:""},
+ {id:"p040",e:"TRAD",b:"Reportes y apoyo",p:"Apoyo a actividades administrativas y contables de Gerencia o contabilidad",t:"Sandra",s1:"",s2:"",c:"Baja",v:"1 semana",d:"No",n:""}
+];
+
+function bloques(){
+  const extra = [...new Set(datosSeguro().map(f=>f.b))].filter(b=>b && !BLOQUES_BASE.includes(b));
+  return [...BLOQUES_BASE, ...extra];
+}
+function datosSeguro(){ return Array.isArray(datos) ? datos : []; }
+
+let datos = [];
+let vista = "completa";
+let miNombre = "";
+let guardando = null;
+let ultimaFirma = "";     // huella del último dato conocido, para detectar cambios remotos
+let hayCambiosRemotos = false;
+let sondeoActivo = null;
+
+function firma(d){ return JSON.stringify(d); }
+function hayEdicionActiva(){
+  const a = document.activeElement;
+  return a && (a.tagName==="TEXTAREA" || a.tagName==="SELECT" || (a.tagName==="INPUT" && a.type!=="search"));
+}
+
+/* ═══ conexión con la API compartida (Vercel KV) ═══ */
+const API_MATRIZ = "/api/matriz";
+const CLAVE_ACCESO = localStorage.getItem("clave-acceso-matriz") || "";
+
+async function apiLeer(){
+  const r = await fetch(API_MATRIZ, { headers: CLAVE_ACCESO ? {"x-clave-acceso": CLAVE_ACCESO} : {} });
+  if(r.status === 401){ pedirClaveAcceso(); throw new Error("no autorizado"); }
+  if(!r.ok) throw new Error("fallo de lectura");
+  return r.json(); // { value: string|null }
+}
+async function apiGuardar(valorJson){
+  const r = await fetch(API_MATRIZ, {
+    method:"POST",
+    headers:Object.assign({"Content-Type":"application/json"}, CLAVE_ACCESO?{"x-clave-acceso":CLAVE_ACCESO}:{}),
+    body: JSON.stringify({ value: valorJson })
+  });
+  if(r.status === 401){ pedirClaveAcceso(); throw new Error("no autorizado"); }
+  if(!r.ok) throw new Error("fallo de guardado");
+  return r.json();
+}
+function pedirClaveAcceso(){
+  const c = prompt("Esta matriz está protegida. Ingresa la clave de acceso del equipo:");
+  if(c){ localStorage.setItem("clave-acceso-matriz", c); location.reload(); }
+}
+
+function firma(d){ return JSON.stringify(d); }
+function hayEdicionActiva(){
+  const a = document.activeElement;
+  return a && (a.tagName==="TEXTAREA" || a.tagName==="SELECT" || (a.tagName==="INPUT" && a.type!=="search"));
+}
+
+/* ═══ identidad personal — vive en este navegador, no es compartida ═══ */
+async function cargarIdentidad(){
+  miNombre = localStorage.getItem("mi-nombre-en-la-matriz") || "";
+  document.getElementById("miNombre").value = miNombre;
+}
+function guardarIdentidad(nombre){
+  miNombre = nombre;
+  localStorage.setItem("mi-nombre-en-la-matriz", nombre);
+}
+
+/* ═══ datos compartidos ═══ */
+async function cargar(){
+  try{
+    const r = await apiLeer();
+    if(r && r.value){
+      datos = JSON.parse(r.value);
+      normalizar();
+      ultimaFirma = firma(datos);
+      marcar("Sincronizado "+hora());
+      return;
+    }
+  }catch(e){ marcar("Sin conexión con el servidor — revisa tu internet"); return; }
+  // primera vez: nadie ha guardado nada compartido todavía — sembrar con el inventario base
+  datos = INICIAL.map(x=>({...x}));
+  normalizar();
+  ultimaFirma = firma(datos);
+  marcar("Inventario inicial — compartido con el equipo");
+  guardar();
+}
+function normalizar(){
+  datos.forEach(f=>{
+    if(!f.id) f.id = "p"+String(CONTADOR_ID++).padStart(3,"0");
+    if(!Array.isArray(f.comentarios)) f.comentarios = [];
+    if(f.docPor===undefined) f.docPor = "";
+    if(f.docFecha===undefined) f.docFecha = "";
+  });
+}
+function guardar(){
+  clearTimeout(guardando);
+  guardando = setTimeout(async ()=>{
+    try{
+      const j = JSON.stringify(datos);
+      await apiGuardar(j);
+      ultimaFirma = j;
+      marcar("Guardado "+hora()+(miNombre?" · "+miNombre:""));
+    }catch(e){ marcar("No se pudo guardar — revisa tu conexión"); }
+    finally{ guardando = null; }
+  },500);
+}
+function hora(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+function fechaCorta(){const d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")}
+function marcar(t){document.getElementById("estado").textContent=t}
+
+/* ═══ sondeo — revisa cada 12s si alguien más cambió la matriz ═══ */
+function iniciarSondeo(){
+  sondeoActivo = setInterval(async ()=>{
+    if(guardando) return; // hay un guardado propio en curso, no interferir
+    try{
+      const r = await apiLeer();
+      if(!r || !r.value) return;
+      if(r.value === ultimaFirma) return; // sin cambios
+      if(hayEdicionActiva()){
+        hayCambiosRemotos = true;
+        document.getElementById("bannerSync").style.display = "flex";
+        return;
+      }
+      datos = JSON.parse(r.value);
+      normalizar();
+      ultimaFirma = r.value;
+      render();
+      marcar("Actualizado por el equipo · "+hora());
+    }catch(e){}
+  }, 12000);
+}
+document.getElementById("btnActualizarAhora").addEventListener("click", async ()=>{
+  try{
+    const r = await apiLeer();
+    if(r && r.value){ datos = JSON.parse(r.value); normalizar(); ultimaFirma = r.value; render(); }
+  }catch(e){}
+  hayCambiosRemotos = false;
+  document.getElementById("bannerSync").style.display = "none";
+});
+
+/* ═══ utilidades ═══ */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function opciones(lista,sel){return lista.map(v=>`<option value="${esc(v)}"${v===sel?" selected":""}>${esc(v===""?"— sin definir —":v)}</option>`).join("")}
+function filtros(){
+  return {
+    empresa: document.querySelector("#segEmpresa .on").dataset.emp,
+    persona: document.getElementById("fPersona").value,
+    crit: document.getElementById("fCrit").value,
+    ausente: (document.querySelector("#fichas .on")||{dataset:{}}).dataset.p || "",
+    buscar: document.getElementById("fBuscar").value.trim().toLowerCase()
+  };
+}
+function visible(f,fl){
+  if(fl.empresa && f.e!==fl.empresa) return false;
+  if(fl.persona && f.t!==fl.persona && f.s1!==fl.persona && f.s2!==fl.persona) return false;
+  if(fl.crit && f.c!==fl.crit) return false;
+  if(fl.buscar && !(f.p+" "+f.n+" "+f.b).toLowerCase().includes(fl.buscar)) return false;
+  return true;
+}
+
+/* ═══ render ═══ */
+function render(){
+  const fl = filtros();
+  const cont = document.getElementById("tablero");
+  cont.innerHTML = "";
+  const indices = datos.map((f,i)=>i).filter(i=>visible(datos[i],fl));
+  if(!indices.length) cont.innerHTML = '<div class="nota-vacia">Ningún proceso coincide con los filtros.</div>';
+
+  bloques().forEach(bl=>{
+    const idx = indices.filter(i=>datos[i].b===bl);
+    if(!idx.length) return;
+    const div = document.createElement("div");
+    div.className = "bloque";
+    div.innerHTML = `
+      <div class="bloque-tit">${esc(bl)}
+        <span class="cnt">${idx.length} proceso${idx.length>1?"s":""}
+          <button class="add-bloque" data-add="${esc(bl)}">+ Agregar aquí</button></span>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:20%">Proceso</th>
+          <th class="col-b" style="width:10%">Bloque</th>
+          <th class="col-e" style="width:5%">Empresa</th>
+          <th style="width:10%">Titular</th>
+          <th style="width:10%">Suplente 1</th>
+          <th style="width:10%">Suplente 2</th>
+          <th style="width:6%">Criticidad</th>
+          <th class="col-v" style="width:7%">Aguanta</th>
+          <th class="col-d" style="width:9%">Documentado</th>
+          <th class="col-n" style="width:11%">Notas</th>
+          <th style="width:6%">Comentarios</th>
+          <th></th><th></th>
+        </tr></thead>
+        <tbody>${idx.map(i=>fila(i,fl)).join("")}</tbody>
+      </table>`;
+    cont.appendChild(div);
+  });
+
+  cifras(fl); dashboard(fl); contingencia(fl); avance(); enlazar();
+}
+
+function fila(i,fl){
+  const f = datos[i];
+  let cl = "fila e-"+f.e;
+  if(!f.s1 && !f.s2) cl += " sin-suplente";
+  if(f.t==="Por definir" || f.t==="") cl += " por-definir";
+  let marca = "";
+  if(fl.ausente){
+    if(f.t===fl.ausente){
+      const cubre = f.s1 || f.s2;
+      if(cubre){ cl+=" cubierto"; marca=`<span class="marca-est ok">Cubre ${esc(cubre)}</span>`; }
+      else { cl+=" detenido"; marca=`<span class="marca-est">Se detiene</span>`; }
+    } else cl += " apagado";
+  }
+  const nCom = (f.comentarios||[]).length;
+  const firmaDoc = (f.d==="Sí" && f.docPor)
+    ? `<div style="font-size:10.5px;color:var(--tinta-2);margin-top:3px;font-family:'IBM Plex Mono',monospace">${esc(f.docPor)}${f.docFecha?" · "+esc(f.docFecha):""}</div>` : "";
+  return `<tr class="${cl}" data-i="${i}">
+    <td class="proc"><textarea data-k="p" rows="2">${esc(f.p)}</textarea></td>
+    <td class="col-b"><select data-k="b">${opciones(bloques(),f.b)}<option value="${esc(NUEVO_BLOQUE)}">${esc(NUEVO_BLOQUE)}</option></select></td>
+    <td class="col-e"><select data-k="e">${opciones(["A1","TRAD","AMBAS"],f.e)}</select></td>
+    <td class="titular"><select data-k="t">${opciones(PERSONAS,f.t)}</select></td>
+    <td class="suplente"><select data-k="s1">${opciones(PERSONAS,f.s1)}</select></td>
+    <td class="suplente"><select data-k="s2">${opciones(PERSONAS,f.s2)}</select></td>
+    <td class="crit-${esc(f.c)}"><select data-k="c">${opciones(["Alta","Media","Baja"],f.c)}</select></td>
+    <td class="mono col-v"><input data-k="v" value="${esc(f.v)}"></td>
+    <td class="col-d"><select data-k="d">${opciones(["Sí","Parcial","No"],f.d)}</select>${firmaDoc}</td>
+    <td class="col-n"><textarea data-k="n" rows="2">${esc(f.n)}</textarea></td>
+    <td>
+      <button class="accion" data-comentar="${esc(f.id)}" style="padding:5px 9px;font-size:12px;border-radius:7px;position:relative">
+        💬 ${nCom>0?nCom:""}
+      </button>
+    </td>
+    <td class="celda-marca">${marca}</td>
+    <td><button class="borrar" data-borrar="${i}" title="Eliminar proceso">×</button></td>
+  </tr>`;
+}
+
+function cifras(fl){
+  const v = datos.filter(f=>visible(f,fl));
+  const sinSup = v.filter(f=>!f.s1&&!f.s2);
+  const critSin = sinSup.filter(f=>f.c==="Alta");
+  const porDef = v.filter(f=>f.t==="Por definir"||f.t==="");
+  const sinDoc = v.filter(f=>f.d==="No");
+  const listos = v.filter(f=>(f.s1||f.s2) && f.t && f.t!=="Por definir");
+  const pc = v.length ? Math.round(listos.length/v.length*100) : 0;
+  document.getElementById("cifras").innerHTML = `
+    <div class="cifra"><span class="n">${v.length}</span><span class="t">Procesos</span></div>
+    <div class="cifra ${critSin.length?"alerta":"bien"}"><span class="n">${critSin.length}</span><span class="t">Críticos sin suplente</span></div>
+    <div class="cifra ${sinSup.length?"alerta":"bien"}"><span class="n">${sinSup.length}</span><span class="t">Sin suplente</span></div>
+    <div class="cifra ${porDef.length?"pend":"bien"}"><span class="n">${porDef.length}</span><span class="t">Titular por definir</span></div>
+    <div class="cifra ${sinDoc.length?"pend":"bien"}"><span class="n">${sinDoc.length}</span><span class="t">Sin documentar</span></div>
+    <div class="cifra ${pc===100?"bien":""}"><span class="n">${pc}%</span><span class="t">Procesos resueltos</span></div>`;
+}
+
+function avance(){
+  const listos = datos.filter(f=>(f.s1||f.s2) && f.t && f.t!=="Por definir").length;
+  const pc = datos.length ? Math.round(listos/datos.length*100) : 0;
+  document.getElementById("avanceBarra").style.width = pc+"%";
+  document.getElementById("avanceTxt").textContent = pc+"% resuelto · "+listos+" de "+datos.length;
+}
+
+/* ═══ gráficas ═══ */
+function pct(n,max){return max>0?(n/max*100):0}
+function barra(etq,segs,texto,max,accion){
+  const cuerpo = segs.filter(s=>s.n>0).map(s=>`<div class="seg ${s.k}" style="width:${pct(s.n,max)}%" title="${esc(s.t||"")}: ${s.n}"></div>`).join("");
+  return `<div class="fila-barra" ${accion?`data-persona="${esc(accion)}"`:""}>
+    <span class="etq" title="${esc(etq)}">${esc(etq)}</span>
+    <span class="pista-barra">${cuerpo}</span>
+    <span class="num">${esc(texto)}</span></div>`;
+}
+
+function dashboard(fl){
+  const base = datos.filter(f=>!fl.empresa||f.e===fl.empresa);
+  document.getElementById("dashAlcance").textContent =
+    (fl.empresa?EMPRESAS[fl.empresa]:"Las dos empresas")+" · "+base.length+" procesos";
+
+  const gente = [...PERSONAS.filter(p=>p&&p!=="Por definir"),"Por definir"];
+  const st = gente.map(p=>{
+    const s = base.filter(f=>f.t===p), sup = base.filter(f=>f.s1===p||f.s2===p);
+    return {p,total:s.length,
+      a1:s.filter(f=>f.e==="A1").length, tr:s.filter(f=>f.e==="TRAD").length, amb:s.filter(f=>f.e==="AMBAS").length,
+      det:s.filter(f=>!f.s1&&!f.s2).length, detA:s.filter(f=>!f.s1&&!f.s2&&f.c==="Alta").length,
+      cub:s.filter(f=>f.s1||f.s2).length,
+      sup:sup.length, supA:sup.filter(f=>f.c==="Alta").length};
+  }).filter(s=>s.total>0||s.sup>0);
+
+  const maxC = Math.max(1,...st.map(s=>s.total)), maxS = Math.max(1,...st.map(s=>s.sup));
+  const porCarga = [...st].sort((a,b)=>b.total-a.total);
+  const porSup = [...st].sort((a,b)=>b.sup-a.sup);
+  const totDet = st.reduce((a,s)=>a+s.det,0), totDetA = st.reduce((a,s)=>a+s.detA,0);
+
+  const p1 = `<div class="panel"><h3>Carga por persona</h3>
+    <p class="pista">Procesos donde cada quien es titular, por empresa. Haz clic en una barra para filtrar la tabla.</p>
+    <div class="leyenda"><span><i style="background:#2B2D6E"></i>A1</span><span><i style="background:#F26522"></i>Traduciendo</span><span><i style="background:#8B8F99"></i>Ambas</span></div>
+    ${porCarga.filter(s=>s.total>0).map(s=>barra(s.p,
+      [{k:"a1",n:s.a1,t:"A1"},{k:"tr",n:s.tr,t:"Traduciendo"},{k:"amb",n:s.amb,t:"Ambas"}],
+      s.total, maxC, s.p)).join("")}</div>`;
+
+  const p2 = `<div class="panel"><h3>Qué se detiene si falta cada uno</h3>
+    <p class="pista">De sus procesos, cuántos tienen quién los tome y cuántos no.</p>
+    <div class="leyenda"><span><i style="background:#2B2D6E"></i>Cubierto</span><span><i style="background:#C41230"></i>Se detiene</span></div>
+    ${porCarga.filter(s=>s.total>0).map(s=>barra(s.p,
+      [{k:"solido",n:s.cub,t:"Cubierto"},{k:"riesgo",n:s.det,t:"Se detiene"}],
+      s.det+" / "+s.total, maxC, s.p)).join("")}
+    <div class="aviso ${totDetA?"":"ok"}">${totDetA
+      ? totDetA+" proceso"+(totDetA>1?"s":"")+" de criticidad alta se detendría"+(totDetA>1?"n":"")+" sin reemplazo."
+      : "Todos los procesos críticos tienen a quién los tome."}</div></div>`;
+
+  const p3 = `<div class="panel"><h3>Suplencias asumidas</h3>
+    <p class="pista">Cuántos procesos cubriría cada uno como suplente. Si alguien acumula muchos críticos, el día que falte otro se satura.</p>
+    <div class="leyenda"><span><i style="background:#141416"></i>Críticos</span><span><i style="background:#B9BDC6"></i>Resto</span></div>
+    ${porSup.filter(s=>s.sup>0).map(s=>barra(s.p,
+      [{k:"oscuro",n:s.supA,t:"Críticos"},{k:"tenue",n:s.sup-s.supA,t:"Resto"}],
+      s.sup, maxS, s.p)).join("") || '<p class="pista">Todavía no hay suplentes asignados.</p>'}</div>`;
+
+  const n = base.length||1;
+  const conSup = base.filter(f=>f.s1||f.s2).length;
+  const defin = base.filter(f=>f.t&&f.t!=="Por definir").length;
+  const doc = base.filter(f=>f.d==="Sí").length, docP = base.filter(f=>f.d==="Parcial").length;
+  const p4 = `<div class="panel"><h3>Avance de la matriz</h3>
+    <p class="pista">Qué tan completa está. Sirve para saber si la reunión ya terminó.</p>
+    ${barra("Con suplente",[{k:"ok",n:conSup,t:"Con suplente"},{k:"riesgo",n:n-conSup,t:"Sin suplente"}],conSup+" / "+base.length,n)}
+    ${barra("Titular claro",[{k:"solido",n:defin,t:"Definido"},{k:"tr",n:n-defin,t:"Por definir"}],defin+" / "+base.length,n)}
+    ${barra("Documentado",[{k:"ok",n:doc,t:"Sí"},{k:"trb",n:docP,t:"Parcial"},{k:"tenue",n:n-doc-docP,t:"No"}],(doc+docP)+" / "+base.length,n)}
+    <div class="aviso ${totDet?"":"ok"}">${totDet?"Faltan "+totDet+" suplencias por asignar.":"Todos los procesos tienen suplente asignado."}</div></div>`;
+
+  document.getElementById("dashGrid").innerHTML = p1+p2+p3+p4;
+}
+
+function contingencia(fl){
+  const caja = document.getElementById("contingencia");
+  if(!fl.ausente){ caja.classList.remove("activo"); return; }
+  caja.classList.add("activo");
+  const suyos = datos.filter(f=>f.t===fl.ausente);
+  const det = suyos.filter(f=>!f.s1&&!f.s2), cub = suyos.filter(f=>f.s1||f.s2);
+  document.getElementById("contTitulo").innerHTML = "Si hoy falta <em>"+esc(fl.ausente)+"</em>";
+  document.getElementById("contTexto").textContent =
+    `${fl.ausente} es titular de ${suyos.length} proceso${suyos.length===1?"":"s"}. Las filas en rojo no tienen quién las tome.`;
+  document.getElementById("contDetenidos").textContent = det.length;
+  document.getElementById("contCubiertos").textContent = cub.length;
+  document.getElementById("contCriticos").textContent = det.filter(f=>f.c==="Alta").length;
+}
+
+/* ═══ eventos de fila ═══ */
+function enlazar(){
+  document.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation(); agregarProceso(e.target.dataset.add);
+  }));
+  document.querySelectorAll("[data-persona]").forEach(b=>b.addEventListener("click",e=>{
+    const p = e.currentTarget.dataset.persona;
+    const sel = document.getElementById("fPersona");
+    sel.value = (sel.value===p)?"":p;
+    render();
+    document.getElementById("tablero").scrollIntoView({behavior:"smooth",block:"start"});
+  }));
+  document.querySelectorAll("[data-comentar]").forEach(b=>b.addEventListener("click",e=>{
+    abrirComentarios(e.currentTarget.dataset.comentar);
+  }));
+  document.querySelectorAll("tr.fila [data-k]").forEach(el=>{
+    el.addEventListener("change",e=>{
+      const tr = e.target.closest("tr"), f = datos[+tr.dataset.i];
+      if(e.target.dataset.k==="b" && e.target.value===NUEVO_BLOQUE){
+        const nom = (prompt("Nombre del nuevo bloque:")||"").trim();
+        if(!nom){ render(); return; }
+        f.b = nom;
+      } else {
+        f[e.target.dataset.k] = e.target.value;
+        if(e.target.dataset.k==="d"){
+          if(e.target.value==="Sí"){ f.docPor = miNombre || "Sin identificar"; f.docFecha = fechaCorta(); }
+          else { f.docPor = ""; f.docFecha = ""; }
+        }
+      }
+      guardar(); render();
+    });
+    if(el.tagName==="TEXTAREA"||el.type==="text"){
+      el.addEventListener("input",e=>{
+        datos[+e.target.closest("tr").dataset.i][e.target.dataset.k] = e.target.value;
+        guardar(); avance();
+      });
+    }
+  });
+  document.querySelectorAll("[data-borrar]").forEach(b=>b.addEventListener("click",e=>{
+    const i = +e.target.dataset.borrar;
+    if(confirm("¿Eliminar «"+datos[i].p+"»?")){ datos.splice(i,1); guardar(); render(); }
+  }));
+}
+
+/* ═══ comentarios ═══ */
+function abrirComentarios(id){
+  const f = datos.find(x=>x.id===id);
+  if(!f) return;
+  const lista = (f.comentarios||[]).map(c=>`· ${c.autor||"Sin nombre"} (${c.fecha}): ${c.texto}`).join("\n");
+  const previo = lista ? lista+"\n\n" : "";
+  const nuevo = prompt(
+    (lista?"Comentarios de «"+f.p+"»:\n\n"+lista+"\n\n":"Sin comentarios todavía en «"+f.p+"».\n\n")+
+    "Escribe tu comentario (déjalo vacío para cancelar):"
+  );
+  if(!nuevo || !nuevo.trim()) return;
+  if(!Array.isArray(f.comentarios)) f.comentarios = [];
+  f.comentarios.push({autor: miNombre||"Sin identificar", texto: nuevo.trim(), fecha: fechaCorta()});
+  guardar(); render();
+}
+
+function agregarProceso(bloque){
+  datos.push({id:"p"+String(CONTADOR_ID++).padStart(3,"0"),e:"A1",b:bloque||bloques()[0],p:"Nuevo proceso",t:"Por definir",s1:"",s2:"",c:"Media",v:"",d:"No",n:"",comentarios:[],docPor:"",docFecha:""});
+  guardar(); render();
+  const tr = [...document.querySelectorAll("tr.fila")].find(t=>+t.dataset.i===datos.length-1);
+  if(tr){ tr.scrollIntoView({behavior:"smooth",block:"center"});
+    const c = tr.querySelector('[data-k="p"]'); if(c){ c.focus(); c.select&&c.select(); } }
+}
+
+/* ═══ controles ═══ */
+function fichasPersonas(){
+  const lista = PERSONAS.filter(p=>p&&p!=="Por definir");
+  document.getElementById("fichas").innerHTML =
+    lista.map(p=>`<button class="ficha" data-p="${esc(p)}">${esc(p)}</button>`).join("");
+  document.getElementById("fPersona").innerHTML =
+    '<option value="">Todas</option>'+lista.map(p=>`<option>${esc(p)}</option>`).join("");
+  document.querySelectorAll("#fichas .ficha").forEach(b=>b.addEventListener("click",()=>{
+    const ya = b.classList.contains("on");
+    document.querySelectorAll("#fichas .ficha").forEach(x=>x.classList.remove("on"));
+    if(!ya) b.classList.add("on");
+    render();
+  }));
+}
+document.querySelectorAll("#segEmpresa button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#segEmpresa button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); render();
+}));
+document.querySelectorAll("#segVista button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#segVista button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); vista = b.dataset.vista;
+  document.body.classList.toggle("compacta", vista==="compacta");
+}));
+["fPersona","fCrit"].forEach(id=>document.getElementById(id).addEventListener("change",render));
+document.getElementById("fBuscar").addEventListener("input",render);
+document.getElementById("btnDash").addEventListener("click",e=>{
+  const d = document.getElementById("dash"); d.classList.toggle("oculto");
+  e.target.textContent = d.classList.contains("oculto")?"Mostrar gráficas":"Ocultar gráficas";
+});
+document.getElementById("btnAgregar").addEventListener("click",()=>agregarProceso());
+
+/* ═══ exportar ═══ */
+function bajar(nombre,texto,tipo){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([texto],{type:tipo}));
+  a.download=nombre; a.click(); URL.revokeObjectURL(a.href);
+}
+document.getElementById("btnCSV").addEventListener("click",()=>{
+  const cab=["Bloque","Proceso","Empresa","Titular","Suplente 1","Suplente 2","Criticidad","Aguanta","Documentado","Notas"];
+  const q=s=>'"'+String(s==null?"":s).replace(/"/g,'""')+'"';
+  const filas=datos.map(f=>[f.b,f.p,EMPRESAS[f.e]||f.e,f.t,f.s1,f.s2,f.c,f.v,f.d,f.n].map(q).join(";"));
+  bajar("matriz-suplencias.csv","\uFEFF"+[cab.map(q).join(";"),...filas].join("\r\n"),"text/csv;charset=utf-8");
+});
+document.getElementById("btnJSON").addEventListener("click",()=>bajar("matriz-suplencias.json",JSON.stringify(datos,null,2),"application/json"));
+document.getElementById("btnImportar").addEventListener("click",()=>document.getElementById("archivo").click());
+document.getElementById("archivo").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result);
+    if(Array.isArray(d)){ datos=d; guardar(); render(); marcar("Copia cargada"); }
+    else marcar("Formato no reconocido");
+  }catch(err){ marcar("No se pudo leer el archivo"); } };
+  r.readAsText(f);
+});
+document.getElementById("btnReiniciar").addEventListener("click",()=>{
+  if(confirm("Esto descarta los cambios de TODO el equipo y vuelve al inventario inicial. ¿Continuar?")){
+    datos = INICIAL.map(x=>({...x, comentarios:[], docPor:"", docFecha:""})); guardar(); render();
+  }
+});
+document.getElementById("miNombre").innerHTML =
+  '<option value="">— elegir —</option>' + PERSONAS.filter(p=>p&&p!=="Por definir").map(p=>`<option>${esc(p)}</option>`).join("");
+document.getElementById("miNombre").addEventListener("change", e=>guardarIdentidad(e.target.value));
+window.addEventListener("scroll",()=>{
+  const c=document.getElementById("control");
+  if(c) c.classList.toggle("pegada", window.scrollY>140);
+});
+
+/* ═══ arranque ═══ */
+fichasPersonas();
+cargarIdentidad().then(()=>cargar()).then(()=>{ render(); iniciarSondeo(); });
+</script>
+</body>
+</html>
