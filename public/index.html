@@ -490,6 +490,19 @@ function hayEdicionActiva(){
   const a = document.activeElement;
   return a && (a.tagName==="TEXTAREA" || a.tagName==="SELECT" || (a.tagName==="INPUT" && a.type!=="search"));
 }
+/* hay trabajo en pantalla que el servidor todavía no confirmó — nunca se puede pisar */
+function hayCambiosSinGuardar(){
+  return ultimaFirma !== "" && firma(datos) !== ultimaFirma;
+}
+
+/* ═══ red de seguridad local — copia en este navegador por si falla el guardado ═══ */
+const RESPALDO_LOCAL = "matriz-respaldo-local";
+function respaldarLocal(){
+  try{ localStorage.setItem(RESPALDO_LOCAL, JSON.stringify({fecha:Date.now(), datos})); }catch(e){}
+}
+function leerRespaldoLocal(){
+  try{ return JSON.parse(localStorage.getItem(RESPALDO_LOCAL) || "null"); }catch(e){ return null; }
+}
 
 /* ═══ conexión con la API compartida (Vercel KV) ═══ */
 const API_MATRIZ = "/api/matriz";
@@ -537,10 +550,19 @@ async function cargar(){
   try{
     const r = await apiLeer();
     if(r && r.value){
-      datos = JSON.parse(r.value);
-      normalizar();
+      datos = normalizar(JSON.parse(r.value));
       ultimaFirma = firma(datos);
       marcar("Sincronizado "+hora());
+      // ¿quedó en este navegador trabajo que nunca llegó al servidor? no descartarlo en silencio
+      const resp = leerRespaldoLocal();
+      if(resp && Array.isArray(resp.datos) && firma(normalizar(resp.datos)) !== ultimaFirma){
+        const f = new Date(resp.fecha);
+        const cuando = String(f.getDate()).padStart(2,"0")+"/"+String(f.getMonth()+1).padStart(2,"0")+" "+String(f.getHours()).padStart(2,"0")+":"+String(f.getMinutes()).padStart(2,"0");
+        if(confirm("En este navegador hay una copia de la matriz del "+cuando+" ("+resp.datos.length+" filas) distinta de la del servidor ("+datos.length+" filas).\n\nEsto pasa cuando un guardado no llegó a completarse.\n\n¿Quieres recuperar esa copia? (Cancelar = quedarte con la del servidor)")){
+          datos = normalizar(resp.datos);
+          marcar("Copia local recuperada — revísala y pulsa cualquier celda para guardarla");
+        }
+      }
       return;
     }
   }catch(e){
@@ -552,31 +574,48 @@ async function cargar(){
     marcar("Sin conexión con el servidor — los cambios no se están guardando");
     return;
   }
-  // primera vez: nadie ha guardado nada compartido todavía — sembrar con el inventario base
+  // el servidor respondió, pero vacío. NO sembramos automáticamente: si esto ocurre por un
+  // fallo temporal (base recién creada, variables de entorno mal puestas), un guardado
+  // automático aquí borraría el trabajo de todo el equipo. Lo mostramos y que decida una persona.
   datos = INICIAL.map(x=>({...x}));
   normalizar();
-  ultimaFirma = firma(datos);
-  marcar("Inventario inicial — compartido con el equipo");
-  guardar();
+  ultimaFirma = "";
+  marcar("El servidor está vacío — pulsa «Guardar ahora» solo si es la primera vez que se usa");
 }
-function normalizar(){
-  datos.forEach(f=>{
+function normalizar(arr){
+  (arr || datos).forEach(f=>{
     if(!f.id) f.id = "p"+String(CONTADOR_ID++).padStart(3,"0");
     if(!Array.isArray(f.comentarios)) f.comentarios = [];
     if(f.docPor===undefined) f.docPor = "";
     if(f.docFecha===undefined) f.docFecha = "";
   });
+  return arr || datos;
+}
+/* huella de lo que venga del servidor, medida igual que la local (ya normalizada),
+   para que comparar "servidor vs pantalla" no dé falsos positivos por campos añadidos */
+function firmaRemota(valor){
+  try{ return firma(normalizar(JSON.parse(valor))); }catch(e){ return null; }
 }
 function guardar(){
+  respaldarLocal();          // primero la copia local: si el servidor falla, el trabajo no se pierde
   clearTimeout(guardando);
   guardando = setTimeout(async ()=>{
-    try{
-      const j = JSON.stringify(datos);
-      await apiGuardar(j);
-      ultimaFirma = j;
-      marcar("Guardado "+hora()+(miNombre?" · "+miNombre:""));
-    }catch(e){ marcar("No se pudo guardar — revisa tu conexión"); }
-    finally{ guardando = null; }
+    const j = JSON.stringify(datos);
+    for(let intento=1; intento<=3; intento++){
+      try{
+        await apiGuardar(j);
+        ultimaFirma = j;
+        marcar("Guardado "+hora()+(miNombre?" · "+miNombre:""));
+        guardando = null;
+        return;
+      }catch(e){
+        if(intento < 3){ await new Promise(r=>setTimeout(r, intento*1500)); continue; }
+        // se agotaron los reintentos: aviso visible y permanente, y la copia local ya está a salvo
+        marcar("⚠ NO SE ESTÁ GUARDANDO — tus cambios solo están en este navegador. No cierres la página.");
+        document.getElementById("estado").style.color = "#b00020";
+      }
+    }
+    guardando = null;
   },500);
 }
 function hora(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
@@ -590,24 +629,27 @@ function iniciarSondeo(){
     try{
       const r = await apiLeer();
       if(!r || !r.value) return;
-      if(r.value === ultimaFirma) return; // sin cambios
-      if(hayEdicionActiva()){
+      const fr = firmaRemota(r.value);
+      if(fr === null || fr === ultimaFirma) return; // ilegible o sin cambios
+      // NUNCA reemplazar la pantalla si hay trabajo propio sin confirmar por el servidor,
+      // o si la persona está escribiendo. Se avisa con el banner y ella decide cuándo traer.
+      if(hayEdicionActiva() || hayCambiosSinGuardar()){
         hayCambiosRemotos = true;
         document.getElementById("bannerSync").style.display = "flex";
         return;
       }
-      datos = JSON.parse(r.value);
-      normalizar();
-      ultimaFirma = r.value;
+      datos = normalizar(JSON.parse(r.value));
+      ultimaFirma = firma(datos);
       render();
       marcar("Actualizado por el equipo · "+hora());
     }catch(e){}
   }, 12000);
 }
 document.getElementById("btnActualizarAhora").addEventListener("click", async ()=>{
+  if(hayCambiosSinGuardar() && !confirm("Tienes cambios que el servidor todavía no confirmó. Si traes la versión del equipo ahora, esos cambios se pierden.\n\n¿Traer la versión del equipo de todos modos?")) return;
   try{
     const r = await apiLeer();
-    if(r && r.value){ datos = JSON.parse(r.value); normalizar(); ultimaFirma = r.value; render(); }
+    if(r && r.value){ datos = normalizar(JSON.parse(r.value)); ultimaFirma = firma(datos); render(); }
   }catch(e){}
   hayCambiosRemotos = false;
   document.getElementById("bannerSync").style.display = "none";
