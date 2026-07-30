@@ -1039,8 +1039,12 @@ document.getElementById("archivo").addEventListener("change",e=>{
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
   r.onload=()=>{ try{ const d=JSON.parse(r.result);
-    if(Array.isArray(d)){ datos=d; guardar(); render(); marcar("Copia cargada"); }
-    else marcar("Formato no reconocido");
+    if(!Array.isArray(d) || !d.length || typeof d[0]!=="object" || d[0].p===undefined){ marcar("Formato no reconocido — se esperaba una copia de la matriz"); return; }
+    if(!confirm("Vas a reemplazar la matriz del equipo ("+datos.length+" filas) por la del archivo ("+d.length+" filas).\n\n¿Continuar?")) return;
+    datos = normalizar(d);   // los archivos viejos no traen id/comentarios/docPor/docFecha
+    render();
+    guardarAhora();          // guardado inmediato, sin esperar al autoguardado
+    marcar("Copia cargada — guardando…");
   }catch(err){ marcar("No se pudo leer el archivo"); } };
   r.readAsText(f);
 });
